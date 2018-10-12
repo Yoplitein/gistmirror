@@ -1,0 +1,2 @@
+requests==2.19.1
+dulwich==0.19.6
