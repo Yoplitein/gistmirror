@@ -1,2 +1,2 @@
-requests==2.21.0
-dulwich==0.19.9
+requests==2.28.1
+dulwich==0.20.50

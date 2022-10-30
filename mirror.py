@@ -89,7 +89,7 @@ def main():
     
     parser.add_argument("-r", "--repo", required=True, help="Path to a bare repository that gists will be pulled to.")
     parser.add_argument("-u", "--user", required=True, help="User to mirror gists from.")
-    parser.add_argument("-p", "--private", action="store_true", default=False, help="Whether to include private repositories.")
+    parser.add_argument("-p", "--private", action="store_true", default=False, help="Whether to include private gists.")
     parser.add_argument("-b", "--branch-names", choices=["hash", "ctime", "description", "filename"], default="hash")
     parser.add_argument("-U", "--token-user", default=None, help="When using authenticated requests, the username to authenticate as.")
     parser.add_argument("-t", "--token", default=None, type=argparse.FileType("r"), help="A file containing an API token. Enables authenticated requests.")
@@ -110,20 +110,9 @@ def main():
     gists = getGists(parsed.user, parsed.private)
     
     for gist in gists:
-        try:
-            dulwich.porcelain.remote_add(repo, gist["id"], gist["git_pull_url"])
-        except:
-            pass
-        
+        head = dulwich.porcelain.fetch(repo, gist["git_pull_url"]).refs[b"HEAD"].decode("utf-8")
         branch = branchName(gist, parsed.branch_names)
-        refs = dulwich.porcelain.fetch(repo, gist["git_pull_url"], gist["id"].encode("utf-8"))
-        
-        try:
-            dulwich.porcelain.branch_delete(repo, branch)
-        except:
-            pass
-        
-        dulwich.porcelain.branch_create(repo, branch, refs[b"HEAD"].decode("utf-8"))
+        dulwich.porcelain.branch_create(repo, branch, head, force=True)
 
 if __name__ == '__main__':
     main()
